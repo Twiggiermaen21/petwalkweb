@@ -12,7 +12,9 @@ export const useDogStore = create((set) => ({
             let imageDataUrl = null;
             if (image && imageBase64) {
                 const uriParts = image.split(".");
-                const fileType = uriParts[uriParts.length - 1];
+                console.log("uriparts:", uriParts)
+                // const fileType = uriParts[uriParts.length - 1];
+                const fileType = null
                 const imageType = fileType ? `image/${fileType.toLowerCase()}` : "image/jpeg";
                 imageDataUrl = `data:${imageType};base64,${imageBase64}`;
             }

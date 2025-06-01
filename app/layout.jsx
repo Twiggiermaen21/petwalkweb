@@ -1,6 +1,6 @@
-// app/layout.jsx
 'use client';
 
+import '@/app/globals.css'; // <-- To MUSI być na górze!
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
@@ -12,10 +12,8 @@ export default function RootLayout({ children }) {
 
   const { authReady, checkAuth, user, token } = useAuthStore();
 
-
   useEffect(() => {
     checkAuth();
-
   }, []);
 
   useEffect(() => {
@@ -32,7 +30,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body>
+      <body className="bg-gray-50 min-h-screen"> {/* bg-gray-50 na start */}
         <NavBar />
         <main>{children}</main>
       </body>
