@@ -1,5 +1,6 @@
 "use client";
 
+// --- Importy hooków, store'ów, komponentów i ikon ---
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { useSettingsStore } from "@/store/settingStore";
@@ -9,13 +10,25 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy } from "lucide-react";
 
+/**
+ * Komponent ligi użytkowników.
+ * Wyświetla ranking użytkowników w różnych poziomach (np. Emerald, Gold).
+ * Umożliwia przełączanie tierów oraz odświeżanie danych.
+ */
 export default function LeagueScreen() {
-    const [selectedTier, setSelectedTier] = useState("Emerald");
+    // --- Stan lokalny ---
+    const [selectedTier, setSelectedTier] = useState("Emerald"); // Aktualnie wybrany poziom ligi
+
+    // --- Dane globalne i tłumaczenia ---
     const { lang } = useSettingsStore();
     const t = LeagueText[lang];
+
     const { token } = useAuthStore();
     const { getLeague, users, isLoading } = useLeagueStore();
 
+    /**
+     * Pobiera dane o lidze z backendu po załadowaniu tokenu
+     */
     const fetchData = async () => {
         const result = await getLeague(token);
         if (!result.success) alert("Error: " + result.error);
@@ -24,13 +37,19 @@ export default function LeagueScreen() {
     useEffect(() => {
         if (token) fetchData();
         // eslint-disable-next-line
-
     }, [token]);
 
-    // Render pojedynczego usera w lidze
+    /**
+     * Renderuje pojedynczego użytkownika w danym tierze
+     */
     const renderUser = (user, index) => (
         <Card key={user._id} className="flex items-center gap-4 p-4 mb-2">
-            <span className="text-lg font-semibold w-6 text-right">{index + 1}.</span>
+            {/* Miejsce w rankingu */}
+            <span className="text-lg font-semibold w-6 text-right">
+                {index + 1}.
+            </span>
+
+            {/* Awatar użytkownika */}
             <Avatar>
                 <AvatarImage
                     src={user.profileImage || "/default-user.jpg"}
@@ -40,29 +59,30 @@ export default function LeagueScreen() {
                     {user.username?.[0]?.toUpperCase() || "U"}
                 </AvatarFallback>
             </Avatar>
+
+            {/* Dane użytkownika */}
             <div className="flex flex-col flex-1 min-w-0">
                 <span className="font-medium truncate">{user.username}</span>
-                <span className="text-gray-500 text-xs">{user.rank} {t.point}</span>
+                <span className="text-gray-500 text-xs">
+                    {user.rank} {t.point}
+                </span>
             </div>
         </Card>
     );
 
     return (
         <div className="w-full max-w-2xl mx-auto py-8">
+            {/* Nagłówek */}
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                 🏆 {t.leagueName}
             </h2>
+
+            {/* Lista poziomów ligi (przyciski zmiany tiera) */}
             <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
                 {t.levels.map((tier) => (
                     <button
                         key={tier.name}
-                        onClick={() => {
-                            setSelectedTier(tier.name)
-                            console.log("selectedTier:", selectedTier);
-                            console.log("users keys:", Object.keys(users));
-                            console.log("users[selectedTier]:", users[selectedTier]);
-                        }
-                        }
+                        onClick={() => setSelectedTier(tier.name)}
                         className={
                             "flex flex-col items-center p-2 rounded-xl transition-all border-2 focus:outline-none min-w-[90px] " +
                             (selectedTier === tier.name
@@ -80,6 +100,7 @@ export default function LeagueScreen() {
                 ))}
             </div>
 
+            {/* Lista użytkowników w wybranym tierze */}
             {isLoading ? (
                 <div className="flex justify-center py-10">
                     <svg className="animate-spin h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24">
@@ -100,12 +121,14 @@ export default function LeagueScreen() {
                     {(users[selectedTier] && users[selectedTier].length > 0) ? (
                         users[selectedTier].map(renderUser)
                     ) : (
-                        <div className="text-center text-gray-400 py-8">{t.noUsers || "Brak użytkowników"}</div>
+                        <div className="text-center text-gray-400 py-8">
+                            {t.noUsers || "Brak użytkowników"}
+                        </div>
                     )}
                 </div>
             )}
 
-            {/* Przycisk do ręcznego odświeżenia */}
+            {/* Przycisk do ręcznego odświeżenia danych */}
             <div className="flex justify-center mt-6">
                 <button
                     onClick={fetchData}

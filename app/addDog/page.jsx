@@ -1,5 +1,6 @@
 "use client";
 
+// --- Hooki i zależności ---
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,29 +25,29 @@ import { Slider } from "@/components/ui/slider";
 import { Loader2, Image as ImageIcon, ChevronLeft, PlusCircle } from "lucide-react";
 import { useRef, useState } from "react";
 
-// --- Zod schema (możesz dostosować do swoich wymagań) ---
+// --- Schemat walidacji Zod ---
 const dogSchema = z.object({
     name: z.string().min(1, "Podaj imię psa"),
     breed: z.string().optional(),
     weight: z.number().min(0).max(100),
     age: z.number().min(0).max(20),
     height: z.number().min(0).max(100),
-    image: z.any().optional(), // tutaj tylko podgląd pliku
+    image: z.any().optional(),
 });
 
 export default function AddDog() {
-    const { token } = useAuthStore();
-    const { addDog } = useDogStore();
-    const { lang } = useSettingsStore();
-    const t = AddDogText[lang];
-    const router = useRouter();
+    const { token } = useAuthStore(); // Token JWT użytkownika
+    const { addDog } = useDogStore(); // Funkcja do dodania psa (z store'u Zustand)
+    const { lang } = useSettingsStore(); // Wybrany język aplikacji
+    const t = AddDogText[lang]; // Teksty przetłumaczone wg języka
+    const router = useRouter(); // Hook nawigacyjny Next.js
 
-    // For image preview
-    const [image, setImage] = useState(null);
-    const [imageBase64, setImageBase64] = useState(null);
-    const fileInput = useRef(null);
+    // --- Stan lokalny obrazu (podgląd i base64) ---
+    const [image, setImage] = useState(null); // Lokalny URL dla podglądu
+    const [imageBase64, setImageBase64] = useState(null); // Base64 do przesłania
+    const fileInput = useRef(null); // Referencja do ukrytego inputa typu file
 
-    // React Hook Form
+    // --- Inicjalizacja formularza z walidacją Zod ---
     const form = useForm({
         resolver: zodResolver(dogSchema),
         defaultValues: {
@@ -60,23 +61,33 @@ export default function AddDog() {
         mode: "onChange",
     });
 
-    // Obsługa uploadu i konwersji do base64
+    /**
+     * Obsługuje wybór pliku obrazu i konwertuje go do base64.
+     */
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
+
+        // Tworzenie podglądu
         setImage(URL.createObjectURL(file));
 
+        // Konwersja na base64
         const reader = new FileReader();
         reader.onloadend = () => {
             setImageBase64(reader.result.split(",")[1]);
-            form.setValue("image", file); // zapisz plik w formularzu
+            form.setValue("image", file); // Zapis do formularza
         };
         reader.readAsDataURL(file);
     };
 
+    /**
+     * Wywołuje kliknięcie ukrytego inputa pliku.
+     */
     const triggerFileSelect = () => fileInput.current?.click();
 
-    // On submit
+    /**
+     * Obsługuje wysyłkę formularza: waliduje dane, wysyła je, obsługuje komunikaty i resetuje stan.
+     */
     const onSubmit = async (data) => {
         if (!data.name) {
             toast.error("Podaj imię psa!");
@@ -85,16 +96,18 @@ export default function AddDog() {
         try {
             form.clearErrors();
             form.setError("root", { message: "" });
+
             const result = await addDog(
                 token,
                 data.name,
                 data.age,
                 data.breed,
-                image, // podgląd, nie wysyłaj do backendu, tylko url lub base64
+                image, // URL do podglądu (tylko lokalnie)
                 data.height,
                 data.weight,
-                imageBase64
+                imageBase64 // faktyczny plik do zapisu w bazie
             );
+
             if (!result.success) {
                 toast.error(result.error || "Błąd dodawania psa");
             } else {
@@ -102,7 +115,7 @@ export default function AddDog() {
                 form.reset();
                 setImage(null);
                 setImageBase64(null);
-                router.push("/profil");
+                router.push("/profil"); // przekierowanie do profilu
             }
         } catch (error) {
             toast.error(error.message || "Coś poszło nie tak");
@@ -111,6 +124,7 @@ export default function AddDog() {
 
     return (
         <div className="w-full max-w-lg mx-auto py-8">
+            {/* Powrót */}
             <Button
                 variant="ghost"
                 className="mb-3 flex items-center gap-2"
@@ -118,17 +132,21 @@ export default function AddDog() {
             >
                 <ChevronLeft size={20} /> {t.backButton}
             </Button>
+
+            {/* Formularz */}
             <Form {...form}>
                 <form
                     className="bg-white dark:bg-gray-900 shadow-xl rounded-2xl p-8 space-y-6"
                     onSubmit={form.handleSubmit(onSubmit)}
                     autoComplete="off"
                 >
+                    {/* Nagłówek */}
                     <div>
                         <h2 className="text-2xl font-bold">{t.title}</h2>
                         <p className="text-gray-500 text-sm mt-1">{t.subtitle}</p>
                     </div>
 
+                    {/* Pole: imię */}
                     <FormField
                         control={form.control}
                         name="name"
@@ -142,6 +160,8 @@ export default function AddDog() {
                             </FormItem>
                         )}
                     />
+
+                    {/* Pole: rasa */}
                     <FormField
                         control={form.control}
                         name="breed"
@@ -155,7 +175,7 @@ export default function AddDog() {
                         )}
                     />
 
-                    {/* Slider weight */}
+                    {/* Suwak: waga */}
                     <FormField
                         control={form.control}
                         name="weight"
@@ -175,7 +195,8 @@ export default function AddDog() {
                             </FormItem>
                         )}
                     />
-                    {/* Slider age */}
+
+                    {/* Suwak: wiek */}
                     <FormField
                         control={form.control}
                         name="age"
@@ -195,7 +216,8 @@ export default function AddDog() {
                             </FormItem>
                         )}
                     />
-                    {/* Slider height */}
+
+                    {/* Suwak: wysokość */}
                     <FormField
                         control={form.control}
                         name="height"
@@ -216,7 +238,7 @@ export default function AddDog() {
                         )}
                     />
 
-                    {/* Image upload */}
+                    {/* Upload zdjęcia */}
                     <FormItem>
                         <FormLabel>{t.imageLabel}</FormLabel>
                         <FormControl>
@@ -251,6 +273,7 @@ export default function AddDog() {
                         <FormDescription>{t.imageDesc}</FormDescription>
                     </FormItem>
 
+                    {/* Przycisk wysyłki */}
                     <Button
                         type="submit"
                         className="w-full flex items-center gap-2 justify-center"

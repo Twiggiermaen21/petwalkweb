@@ -1,5 +1,6 @@
 'use client';
 
+// --- Importy hooków, komponentów, store'ów i assetów ---
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -13,38 +14,58 @@ import ProfileText from "@/assets/lang/Profile.text";
 import noDog from "@/assets/ImagesPetWalk/noDog.jpeg";
 import { toast } from "sonner";
 
+/**
+ * Ekran profilu użytkownika.
+ * Pokazuje listę jego psów wraz z danymi, opcją usuwania i przyciskiem dodawania nowego psa.
+ */
 export default function ProfileScreen() {
     const router = useRouter();
-    const { token } = useAuthStore();
-    const { lang } = useSettingsStore();
-    const { dogsFromDB, getDogs, isLoading, DeletedDogId } = useDogStore();
-    const t = ProfileText[lang];
+    const { token } = useAuthStore(); // token użytkownika (autoryzacja)
+    const { lang } = useSettingsStore(); // aktualny język
+    const { dogsFromDB, getDogs, isLoading, DeletedDogId } = useDogStore(); // store psów
+    const t = ProfileText[lang]; // teksty zależne od języka
 
-    const [refreshing, setRefreshing] = useState(false);
+    const [refreshing, setRefreshing] = useState(false); // stan: czy trwa odświeżanie
 
+    /**
+     * Pobranie listy psów z bazy danych (na start lub przy odświeżeniu)
+     */
     const GetDogsFromDataBase = async () => {
         const result = await getDogs(token);
         if (!result.success) toast.error(result.error || "Error");
     };
 
+    // Po uzyskaniu tokenu, pobierz psy
     useEffect(() => {
         if (token) GetDogsFromDataBase();
         // eslint-disable-next-line
     }, [token]);
 
+    /**
+     * Usuwa psa o podanym ID
+     */
     const handleDeleteDog = async (dogId) => {
         const result = await DeletedDogId(token, dogId);
-        if (!result.success) toast.error(result.error || "Error");
-        else toast.success(t.Success || "Sukces", { description: t.DeleteDog });
-        handleRefresh();
+        if (!result.success) {
+            toast.error(result.error || "Error");
+        } else {
+            toast.success(t.Success || "Sukces", { description: t.DeleteDog });
+            handleRefresh();
+        }
     };
 
+    /**
+     * Potwierdzenie usunięcia psa
+     */
     const confirmDelete = (dogId) => {
         if (window.confirm(`${t.deleteMessage}\n\n${t.confirmDelete}?`)) {
             handleDeleteDog(dogId);
         }
     };
 
+    /**
+     * Odświeżenie listy psów
+     */
     const handleRefresh = async () => {
         setRefreshing(true);
         await GetDogsFromDataBase();
@@ -53,7 +74,10 @@ export default function ProfileScreen() {
 
     return (
         <div className="max-w-2xl mx-auto p-4">
+            {/* Nagłówek profilu */}
             <ProfileHeader />
+
+            {/* Nagłówek sekcji psów + przycisk dodania */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mt-8 mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-center tracking-tight">
                     {t.Yourpets || "Twoje zwierzaki"}
@@ -65,6 +89,7 @@ export default function ProfileScreen() {
                     <PlusCircle size={20} /> {t.addDog || "Dodaj psa"}
                 </Button>
             </div>
+
             {/* Lista psów */}
             {isLoading || refreshing ? (
                 <div className="flex justify-center my-12">
@@ -81,6 +106,7 @@ export default function ProfileScreen() {
                             key={item._id}
                             className="bg-white border border-gray-200 dark:bg-gray-900 dark:border-gray-800 shadow-md rounded-2xl flex flex-col sm:flex-row items-center gap-5 p-4 relative group hover:shadow-xl transition-shadow"
                         >
+                            {/* Obraz psa */}
                             <div className="relative">
                                 <Image
                                     src={item.dogImage || noDog}
@@ -91,6 +117,8 @@ export default function ProfileScreen() {
                                     style={{ width: 88, height: 88 }}
                                 />
                             </div>
+
+                            {/* Dane psa */}
                             <div className="flex-1 w-full">
                                 <h3 className="font-semibold text-lg leading-tight mb-1">
                                     {item.name}
@@ -102,6 +130,8 @@ export default function ProfileScreen() {
                                     <div><dt className="inline">{t.height}:</dt> <dd className="inline ml-1">{item.height} cm</dd></div>
                                 </dl>
                             </div>
+
+                            {/* Przycisk usunięcia psa */}
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -121,6 +151,8 @@ export default function ProfileScreen() {
                     ))}
                 </ul>
             )}
+
+            {/* Przycisk odświeżania */}
             <div className="flex justify-end mt-10">
                 <Button
                     variant="outline"

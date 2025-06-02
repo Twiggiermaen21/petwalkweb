@@ -1,5 +1,6 @@
 "use client";
 
+// --- Importy hooków, komponentów, store'ów i narzędzi ---
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/authStore";
@@ -9,26 +10,52 @@ import HistoryText from "@/assets/lang/History.text";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogCancel, AlertDialogAction, AlertDialogTitle, AlertDialogDescription } from "@/components/ui/alert-dialog";
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogFooter,
+    AlertDialogCancel,
+    AlertDialogAction,
+    AlertDialogTitle,
+    AlertDialogDescription,
+} from "@/components/ui/alert-dialog";
 import PathMap from "@/components/PetWalkComponents/PathMap";
 
-const noDogImg = "/noDog.jpg"; // podmień na swoją ścieżkę
+// Ścieżka domyślnego obrazka, gdy pies nie ma zdjęcia
+const noDogImg = "/noDog.jpg";
 
+/**
+ * Formatowanie czasu z sekund do postaci mm:ss
+ */
 function formatTime(secs) {
-    // Przykładowa implementacja
     const minutes = Math.floor(secs / 60);
     const seconds = secs % 60;
     return `${minutes}m ${seconds}s`;
 }
 
+/**
+ * Komponent ekranu historii spacerów.
+ * Pokazuje listę spacerów z mapką, czasem, dystansem i listą psów.
+ * Umożliwia paginację, odświeżenie i usuwanie spacerów.
+ */
 export default function HistoryScreen() {
+    // --- Store i tłumaczenia ---
     const { token } = useAuthStore();
-    const { walks, page, totalPages, isLoadingMore, refreshing, getWalks, deleteWalk } = useWalkStore();
+    const {
+        walks, page, totalPages,
+        isLoadingMore, refreshing,
+        getWalks, deleteWalk,
+    } = useWalkStore();
     const { lang } = useSettingsStore();
     const t = HistoryText[lang];
 
-    const [deleteId, setDeleteId] = useState(null);
+    const [deleteId, setDeleteId] = useState(null); // ID spaceru do usunięcia
 
+    /**
+     * Pobranie spacerów z backendu (stronicowanie i odświeżanie)
+     */
     const fetchData = async (pageNumber = 1, refreshing = false) => {
         const result = await getWalks(pageNumber, refreshing, token);
         if (!result.success) {
@@ -36,6 +63,7 @@ export default function HistoryScreen() {
         }
     };
 
+    // Pobieranie danych po załadowaniu tokenu
     useEffect(() => {
         if (token) {
             fetchData();
@@ -43,20 +71,32 @@ export default function HistoryScreen() {
         // eslint-disable-next-line
     }, [token]);
 
+    /**
+     * Odświeżenie danych (pierwsza strona)
+     */
     const handleRefresh = async () => {
         await fetchData(1, true);
     };
 
+    /**
+     * Paginacja – ładowanie kolejnych stron
+     */
     const handleLoadMore = () => {
         if (!isLoadingMore && page < totalPages) {
             fetchData(page + 1);
         }
     };
 
+    /**
+     * Przygotowanie do usunięcia spaceru
+     */
     const handleDeleteWalk = (id) => {
         setDeleteId(id);
     };
 
+    /**
+     * Potwierdzenie i wykonanie usunięcia spaceru
+     */
     const confirmDeleteWalk = async () => {
         if (deleteId) {
             const result = await deleteWalk(deleteId, token);
@@ -65,7 +105,7 @@ export default function HistoryScreen() {
                 toast.error(result.error || t.error || "Błąd");
             } else {
                 toast.success(t.deleted || "Spacer usunięty!");
-                fetchData();
+                fetchData(); // Odśwież dane po usunięciu
             }
         }
     };
@@ -73,23 +113,24 @@ export default function HistoryScreen() {
     return (
         <div className="w-full max-w-2xl mx-auto py-8">
             <h2 className="text-2xl font-bold mb-6">{t.historyTitle}</h2>
+
+            {/* Lista spacerów */}
             <div className="space-y-4">
                 {walks.length === 0 ? (
-                    <div className="text-center text-gray-400">{t.noWalks || "Brak spacerów"}</div>
+                    <div className="text-center text-gray-400">
+                        {t.noWalks || "Brak spacerów"}
+                    </div>
                 ) : (
                     walks.map((item) => (
                         <Card key={item._id} className="p-4 flex gap-4 relative group">
-                            {/* Zamiast mapy: szare pole jako placeholder */}
+
+                            {/* Podgląd trasy spaceru */}
                             <div className="w-32 h-32 overflow-hidden rounded-lg">
                                 {item.path?.length > 1 ? (
                                     <PathMap
                                         path={item.path}
-                                        zoom={12} // możesz dostosować zoom do swoich potrzeb
-                                        options={{
-                                            // Opcje Polyline jeśli chcesz inne kolory itd.
-                                            strokeColor: "#0ea5e9", // np. niebieski
-                                        }}
-                                        // Wariant mini: ogranicz interakcje mapy
+                                        zoom={12}
+                                        options={{ strokeColor: "#0ea5e9" }}
                                         mapOptions={{
                                             disableDefaultUI: true,
                                             draggable: false,
@@ -101,7 +142,7 @@ export default function HistoryScreen() {
                                         containerStyle={{
                                             width: "100%",
                                             height: "100%",
-                                            borderRadius: "0.75rem", // zaokrąglenie jak w Tailwind rounded-lg
+                                            borderRadius: "0.75rem",
                                         }}
                                     />
                                 ) : (
@@ -110,22 +151,37 @@ export default function HistoryScreen() {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Szczegóły spaceru */}
                             <div className="flex-1 flex flex-col justify-between">
                                 <div className="flex flex-wrap gap-2 text-sm">
                                     <span>
-                                        {t.date} <span className="font-semibold">{new Date(item.createdAt).toLocaleDateString()}</span>
+                                        {t.date}{" "}
+                                        <span className="font-semibold">
+                                            {new Date(item.createdAt).toLocaleDateString()}
+                                        </span>
                                     </span>
                                     <span>
-                                        {t.time} <span className="font-semibold">{formatTime(item.time)}</span>
+                                        {t.time}{" "}
+                                        <span className="font-semibold">
+                                            {formatTime(item.time)}
+                                        </span>
                                     </span>
                                     <span>
-                                        {t.distance} <span className="font-semibold">{item.distance.toFixed(2)} km</span>
+                                        {t.distance}{" "}
+                                        <span className="font-semibold">
+                                            {item.distance.toFixed(2)} km
+                                        </span>
                                     </span>
                                     <span>
-                                        {t.speed} <span className="font-semibold">{item.speed.toFixed(2)} km/h</span>
+                                        {t.speed}{" "}
+                                        <span className="font-semibold">
+                                            {item.speed.toFixed(2)} km/h
+                                        </span>
                                     </span>
                                 </div>
-                                {/* Lista piesków */}
+
+                                {/* Pieski przypisane do spaceru */}
                                 <div className="flex mt-3 gap-2">
                                     {item.dogs && item.dogs.length > 0
                                         ? item.dogs.map((dog, i) => (
@@ -134,11 +190,15 @@ export default function HistoryScreen() {
                                                 <AvatarFallback>🐶</AvatarFallback>
                                             </Avatar>
                                         ))
-                                        : <span className="text-gray-400">{t.noDogs || "Brak psów"}</span>
-                                    }
+                                        : (
+                                            <span className="text-gray-400">
+                                                {t.noDogs || "Brak psów"}
+                                            </span>
+                                        )}
                                 </div>
                             </div>
-                            {/* Usuwanie */}
+
+                            {/* Przycisk usunięcia spaceru z potwierdzeniem */}
                             <AlertDialog open={deleteId === item._id} onOpenChange={open => !open && setDeleteId(null)}>
                                 <AlertDialogTrigger asChild>
                                     <Button
@@ -156,8 +216,12 @@ export default function HistoryScreen() {
                                         <AlertDialogDescription>{t.deleteMessage}</AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel onClick={() => setDeleteId(null)}>{t.deleteCancel}</AlertDialogCancel>
-                                        <AlertDialogAction onClick={confirmDeleteWalk}>{t.deleteConfirm}</AlertDialogAction>
+                                        <AlertDialogCancel onClick={() => setDeleteId(null)}>
+                                            {t.deleteCancel}
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction onClick={confirmDeleteWalk}>
+                                            {t.deleteConfirm}
+                                        </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
@@ -165,7 +229,8 @@ export default function HistoryScreen() {
                     ))
                 )}
             </div>
-            {/* Paginacja/załaduj więcej */}
+
+            {/* Paginacja */}
             {walks.length > 0 && page < totalPages && (
                 <div className="flex justify-center mt-6">
                     <Button
@@ -177,6 +242,7 @@ export default function HistoryScreen() {
                     </Button>
                 </div>
             )}
+
             {/* Odświeżenie */}
             <div className="flex justify-center mt-6">
                 <Button
