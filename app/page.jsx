@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Cookies from 'js-cookie';
 import { useState } from "react";
+
+
 export default function Home() {
   const [session, setSession] = useState(null);
   const handleGetSession = () => {
@@ -35,11 +37,6 @@ export default function Home() {
           <Button variant="outline">Register</Button>
 
         </Link>
-
-        <div>
-          <button onClick={handleGetSession}>Get session</button>
-
-        </div>
       </div>
     </div>
   );

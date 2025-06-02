@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogCancel, AlertDialogAction, AlertDialogTitle, AlertDialogDescription } from "@/components/ui/alert-dialog";
+import PathMap from "@/components/PetWalkComponents/PathMap";
 
 const noDogImg = "/noDog.jpg"; // podmień na swoją ścieżkę
 
@@ -79,8 +80,35 @@ export default function HistoryScreen() {
                     walks.map((item) => (
                         <Card key={item._id} className="p-4 flex gap-4 relative group">
                             {/* Zamiast mapy: szare pole jako placeholder */}
-                            <div className="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 text-sm">
-                                {item.path?.length > 0 ? t.withPath : t.noPath}
+                            <div className="w-32 h-32 overflow-hidden rounded-lg">
+                                {item.path?.length > 1 ? (
+                                    <PathMap
+                                        path={item.path}
+                                        zoom={12} // możesz dostosować zoom do swoich potrzeb
+                                        options={{
+                                            // Opcje Polyline jeśli chcesz inne kolory itd.
+                                            strokeColor: "#0ea5e9", // np. niebieski
+                                        }}
+                                        // Wariant mini: ogranicz interakcje mapy
+                                        mapOptions={{
+                                            disableDefaultUI: true,
+                                            draggable: false,
+                                            zoomControl: false,
+                                            scrollwheel: false,
+                                            disableDoubleClickZoom: true,
+                                            gestureHandling: "none",
+                                        }}
+                                        containerStyle={{
+                                            width: "100%",
+                                            height: "100%",
+                                            borderRadius: "0.75rem", // zaokrąglenie jak w Tailwind rounded-lg
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs">
+                                        {t.noPath}
+                                    </div>
+                                )}
                             </div>
                             <div className="flex-1 flex flex-col justify-between">
                                 <div className="flex flex-wrap gap-2 text-sm">

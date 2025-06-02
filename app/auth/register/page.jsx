@@ -17,7 +17,7 @@ export default function RegisterPage() {
     else {
       setError(null);
       // Redirect or show success message
-      router.push("/main"); // Redirect to login page after successful registration
+      router.push("/profil"); // Redirect to login page after successful registration
     }
 
   };

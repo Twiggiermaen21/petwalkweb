@@ -18,7 +18,7 @@ export default function LoginPage() {
         if (!result.success) setError(result.error);
         else {
             setError(null);
-            router.push("/tabs");
+            router.push("/profil");
         }
     };
 

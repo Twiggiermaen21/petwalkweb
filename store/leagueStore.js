@@ -17,7 +17,7 @@ export const useLeagueStore = create((set) => ({
 
             const splitTop50ToTiers = (users) => ({
                 Emerald: users.slice(0, 10),
-                Diament: users.slice(10, 20),
+                Diamond: users.slice(10, 20),
                 Gold: users.slice(20, 30),
                 Silver: users.slice(30, 40),
                 Bronze: users.slice(40, 50),

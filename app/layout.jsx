@@ -1,5 +1,5 @@
 'use client';
-
+import Cookies from 'js-cookie';
 import '@/app/globals.css'; // <-- To MUSI być na górze!
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -14,6 +14,7 @@ export default function RootLayout({ children }) {
 
   useEffect(() => {
     checkAuth();
+
   }, []);
 
   useEffect(() => {

@@ -24,6 +24,7 @@ export default function LeagueScreen() {
     useEffect(() => {
         if (token) fetchData();
         // eslint-disable-next-line
+
     }, [token]);
 
     // Render pojedynczego usera w lidze
@@ -55,7 +56,13 @@ export default function LeagueScreen() {
                 {t.levels.map((tier) => (
                     <button
                         key={tier.name}
-                        onClick={() => setSelectedTier(tier.name)}
+                        onClick={() => {
+                            setSelectedTier(tier.name)
+                            console.log("selectedTier:", selectedTier);
+                            console.log("users keys:", Object.keys(users));
+                            console.log("users[selectedTier]:", users[selectedTier]);
+                        }
+                        }
                         className={
                             "flex flex-col items-center p-2 rounded-xl transition-all border-2 focus:outline-none min-w-[90px] " +
                             (selectedTier === tier.name

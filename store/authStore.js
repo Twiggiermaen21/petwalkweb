@@ -25,7 +25,6 @@ export const useAuthStore = create((set) => ({
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || "Something went wrong");
 
-            console.log("Signup response:", data);
             setCookie("session", { token: data.token, user: data.user }, 1);
 
             set({ token: data.token, user: data.user, isLoading: false });
@@ -44,10 +43,9 @@ export const useAuthStore = create((set) => ({
             const session = getCookie("session");
             console.log(session);
 
-            const token = session?.token || null;
-            const userJson = session?.user || null;
-            const user = userJson ? JSON.parse(userJson) : null;
 
+            const token = session?.token || null;
+            const user = session?.user || null;
             set({ token, user, authReady: true });
         } catch (error) {
             console.log("Auth check failed", error);

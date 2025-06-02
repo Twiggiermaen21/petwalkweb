@@ -7,7 +7,7 @@ import { usePhotoStore } from "@/store/photoStore";
 import { useAuthStore } from "@/store/authStore";
 import GalleryText from "@/assets/lang/Gallery.text";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { Trash2, Download, ChevronLeft } from "lucide-react";
 
 export default function GalleryScreen() {
@@ -53,13 +53,21 @@ export default function GalleryScreen() {
   const handleDownload = async () => {
     if (!selectedPhoto) return;
     try {
-      // Prosty download (działa na publiczne obrazy)
+      // Pobierz plik jako BLOB – przeglądarka nie otworzy wtedy podglądu, tylko pobierze
+      const response = await fetch(selectedPhoto.photo);
+      if (!response.ok) throw new Error("Błąd pobierania zdjęcia.");
+      const blob = await response.blob();
+
+      // Stwórz tymczasowy URL do pobrania
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = selectedPhoto.photo;
-      link.download = "photo.jpg";
+      link.href = url;
+      link.download = "photo.jpg"; // Możesz tu dynamicznie ustawić nazwę, np. extracted z URL
       document.body.appendChild(link);
       link.click();
-      link.remove();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
       toast.success(t.downloadSuccess || "Zdjęcie pobrane!");
     } catch (error) {
       toast.error(t.downloadError || "Błąd pobierania zdjęcia.");
@@ -118,6 +126,7 @@ export default function GalleryScreen() {
       {/* MODAL z wybranym zdjęciem */}
       <Dialog open={modalVisible} onOpenChange={setModalVisible}>
         <DialogContent className="max-w-lg w-full flex flex-col items-center p-0 bg-black">
+          <DialogTitle className="sr-only">{t.photoDetails || "Szczegóły zdjęcia"}</DialogTitle>
           {selectedPhoto && (
             <>
               <div className="w-full flex justify-between p-4">
@@ -155,7 +164,7 @@ export default function GalleryScreen() {
                 <img
                   src={selectedPhoto.photo}
                   alt="Full"
-                  className="max-w-[90vw] max-h-[75vh] object-contain rounded-xl"
+                  className="rounded-xl"
                   draggable={false}
                 />
               </div>
