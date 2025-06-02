@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
   const pathname = usePathname();
 
   const { authReady, checkAuth, user, token } = useAuthStore();
-
+  const isSignedIn = !!user && !!token;
   useEffect(() => {
     checkAuth();
 
@@ -20,19 +20,16 @@ export default function RootLayout({ children }) {
   useEffect(() => {
     if (!authReady) return;
     const inAuthScreen = pathname.startsWith('/auth');
-    const inTabsScreen = pathname.startsWith('/tabs');
     const isSignedIn = user && token;
     if (!isSignedIn && !inAuthScreen) {
-      router.replace('/auth');
-    } else if (isSignedIn && inAuthScreen) {
-      router.replace('/tabs');
+      router.replace('/');
     }
   }, [authReady, user, token, pathname]);
 
   return (
     <html lang="en">
       <body className="bg-gray-50 min-h-screen"> {/* bg-gray-50 na start */}
-        <NavBar />
+        <NavBar isSignedIn={isSignedIn} />
         <main>{children}</main>
       </body>
     </html>
