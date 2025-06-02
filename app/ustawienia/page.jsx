@@ -87,11 +87,7 @@ export default function SettingsScreen() {
                 <section>
                     <h3 className="font-semibold mb-2">{t.themeAppearance}</h3>
                     <div className="flex flex-col gap-2">
-                        <ThemePickerButton
-                            label={t.colorScheme}
-                            typ={1}
-                            onConfirm={setColor}
-                        />
+
                         <ThemePickerButton
                             label={t.selectLanguage}
                             typ={2}

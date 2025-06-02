@@ -10,7 +10,7 @@ const SettingsText = {
         notifications: "Notifications",
         emailSMSNotifications: "Email/SMS notifications",
 
-        themeAppearance: "Theme and Language",
+        themeAppearance: "Language",
         darkMode: "Dark Mode",
         fontSize: "Font Size",
         colorScheme: "Color Scheme",
@@ -316,7 +316,7 @@ Dziękujemy za Twoje wsparcie i cierpliwość. Twoja opinia pomaga nam rozwijać
         notifications: "Powiadomienia",
         emailSMSNotifications: "Powiadomienia e-mail/SMS",
 
-        themeAppearance: "Motyw i język",
+        themeAppearance: "Język",
         darkMode: "Tryb ciemny",
         fontSize: "Rozmiar czcionki",
         colorScheme: "Kolorystyka",
@@ -659,26 +659,26 @@ Dziękujemy za Twoje wsparcie i cierpliwość. Twoja opinia pomaga nam rozwijać
         changeEmail: "Alterar e-mail",
         changePassword: "Alterar senha",
         editProfilePicture: "Editar foto de perfil",
-    
+
         notifications: "Notificações",
         emailSMSNotifications: "Notificações por e-mail/SMS",
-    
+
         themeAppearance: "Tema e idioma",
         darkMode: "Modo escuro",
         fontSize: "Tamanho da fonte",
         colorScheme: "Esquema de cores",
-    
+
         selectLanguage: "Selecionar idioma",
         dateFormat: "Formato de data e hora",
         timeZone: "Fuso horário",
-    
+
         privacySecurity: "Privacidade e segurança",
         manageDevices: "Gerenciar dispositivos",
         loginHistory: "Histórico de login",
-    
+
         dataSync: "Dados e sincronização",
         dataUsage: "Uso de dados móveis vs Wi-Fi",
-    
+
         helpOther: "Ajuda e outros",
         helpCenter: "Central de ajuda / FAQ",
         reportProblem: "Reportar um problema",
@@ -693,10 +693,10 @@ Dziękujemy za Twoje wsparcie i cierpliwość. Twoja opinia pomaga nam rozwijać
             3: "Digite uma nova senha (mín. 8 caracteres)",
             4: "Atualize sua foto de perfil."
         },
-    
+
         selectTheme: "Selecionar tema",
     }
-    
+
 
 
 

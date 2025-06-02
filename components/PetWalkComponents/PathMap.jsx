@@ -61,12 +61,12 @@ export default function PathMap({ path = [], options = {}, zoom = 13 }) {
                     zoom={zoom}
 
                     options={{
-                        // disableDefaultUI: true,         // ukrywa wszystkie kontrolki (możesz ustawić na false jeśli chcesz)
-                        // draggable: false,               // blokuje przesuwanie mapy
-                        // zoomControl: false,             // blokuje przyciski zoomu
-                        // scrollwheel: false,             // blokuje zoom na kółku myszy
-                        // disableDoubleClickZoom: true,   // blokuje zoom przez double-click
-                        // gestureHandling: "none",        // blokuje gesty mobilne (pinch, swipe itd.)
+                        disableDefaultUI: true,         // ukrywa wszystkie kontrolki (możesz ustawić na false jeśli chcesz)
+                        draggable: false,               // blokuje przesuwanie mapy
+                        zoomControl: false,             // blokuje przyciski zoomu
+                        scrollwheel: false,             // blokuje zoom na kółku myszy
+                        disableDoubleClickZoom: true,   // blokuje zoom przez double-click
+                        gestureHandling: "none",        // blokuje gesty mobilne (pinch, swipe itd.)
                         styles: [
                             {
                                 featureType: "poi",
